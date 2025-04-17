@@ -172,7 +172,7 @@ class TicketBooking:
 if __name__ == '__main__':
     solver = RecaptchaSolver('https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LeypS8dAAAAAGWYer3FgEpGtmlBWBhsnGF0tCGZ&co=aHR0cHM6Ly90YXprYXJ0aS5jb206NDQz&hl=en&v=9pvHvq7kSOTqqZusUzJ6ewaF&size=invisible&cb=376av9ky8egv')
     tok = solver.get_token()
-    booking = TicketBooking(r'C:\Users\mohamed\Documents\Auto-Booking-Tazkarti-Ticket-main\data.txt', tok)
+    booking = TicketBooking('data.txt', tok)
 
     booking.find_team_info()
     res = booking.wait_for_registration()
