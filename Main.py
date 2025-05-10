@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+from datetime import datetime
 from recap_token import RecaptchaSolver
 
 class TicketBooking:
@@ -55,15 +56,12 @@ class TicketBooking:
 
         message = f"🎟️ المباراة بين: {match['teamName1']} و {match['teamName2']}\n"
         message += "📋 قائمة الدرجات:\n"
-        ticket_found = False
 
         for cat in data:
             if int(cat['teamId']) == self.team_id:
                 message += f"- الفئة: {cat['categoryName']} | المقاعد: {cat['availableSeats']} | السعر: {cat['price']} جنيه\n"
-                if cat['availableSeats'] > 0:
-                    ticket_found = True
 
-        # أرسل إشعار مرة واحدة فقط
+        # إرسال إشعار مرة واحدة فقط
         self.send_telegram_notification(message)
         self.notified_matches.add(match_id)
 
@@ -84,10 +82,22 @@ class TicketBooking:
     def run_monitor(self):
         print("⏳ جاري مراقبة تذاكر الأهلي ...")
         while True:
-            matches = self.get_available_matches()
-            for match in matches:
-                self.check_match_tickets(match)
-            time.sleep(10)
+            try:
+                matches = self.get_available_matches()
+                new_matches = 0
+                for match in matches:
+                    if match['matchId'] not in self.notified_matches:
+                        self.check_match_tickets(match)
+                        new_matches += 1
+
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                if new_matches == 0:
+                    print(f"[{now}] ✅ جاري الفحص... لا توجد مباريات جديدة للأهلي حالياً.")
+
+                time.sleep(10)
+            except Exception as e:
+                print(f"⚠️ خطأ أثناء الفحص: {e}")
+                time.sleep(10)
 
     def login(self):
         headers = self.get_headers()
